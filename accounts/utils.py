@@ -5,6 +5,9 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.conf import settings
+# import ssl
+# import smtplib
+# from decouple import config
 
 def detectUser(user):
     if user.role == 1:
@@ -16,13 +19,15 @@ def detectUser(user):
     elif user.role == None and user.is_superadmin:
         redirectUril = '/admin'
         return redirectUril
-    
 
-def send_verification_email(request, user):
+# email_sender = 'chiiinonsky0009@gmail.com'
+# email_password = config('EMAIL_HOST_PASSWORD')
+
+def send_verification_email(request, user, mail_subject, email_template):
     from_email = settings.DEFAULT_FROM_EMAIL
     current_site = get_current_site(request)
-    mail_subject  = 'Please activate your account'
-    message = render_to_string('accounts/emails/account_verification_email.html', {
+    
+    message = render_to_string(email_template, {
         'user': user,
         'domain': current_site,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
@@ -30,4 +35,13 @@ def send_verification_email(request, user):
     })
     to_email = user.email
     mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
+
+    # context = ssl.create_default_context()
+
+    # with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+    #     smtp.login(email_sender, email_password)
+    #     smtp.sendmail(email_sender, to_email, mail)
+        
+    
     mail.send()
+
